@@ -1,0 +1,62 @@
+#include <AccelStepper.h>
+
+#define MotorInterfaceType 8
+
+// Creates an instance
+// Pins entered in sequence IN1-IN3-IN2-IN4 for proper step sequence
+AccelStepper myStepper(MotorInterfaceType, 2, 4, 3, 5);
+
+bool isEnabled = false;
+
+void setup() {
+  Serial.begin(9600);
+  Serial.setTimeout(10);
+
+  myStepper.setCurrentPosition(0);
+	myStepper.setMaxSpeed(200.0);
+	myStepper.setSpeed(200);
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    String command = Serial.readStringUntil('#');
+    String response = processCommand(command);
+    Serial.println(response);
+  }
+
+  if(isEnabled) {
+    if (myStepper.distanceToGo() != 0) {
+      myStepper.runSpeed();
+    }
+  }
+}
+
+String processCommand(String command) {
+  char commandCode = command[0];
+
+  String stepsString = command.substring(1);
+  int stepsNumber = stepsString.toInt();
+
+  switch(commandCode) {
+    case 'F':
+      isEnabled = true;
+      myStepper.move(stepsNumber);
+      myStepper.setSpeed(200);
+      return "OK";
+    case 'B':
+      isEnabled = true;
+      myStepper.move(-stepsNumber);
+      myStepper.setSpeed(-200);
+      return "OK";
+    case 'S':
+      isEnabled = false;
+      myStepper.stop();
+      myStepper.move(0);
+      myStepper.runToPosition();
+      return "OK";
+    case 'W':
+      return myStepper.isRunning() && isEnabled ? "MOVING" : "IDLE";
+    default:
+      return "UNKNOWN";
+  }
+}
