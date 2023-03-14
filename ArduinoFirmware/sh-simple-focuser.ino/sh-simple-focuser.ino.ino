@@ -7,6 +7,7 @@
 AccelStepper myStepper(MotorInterfaceType, 2, 4, 3, 5);
 
 bool isEnabled = false;
+bool isConnected = false;
 
 void setup() {
   Serial.begin(9600);
@@ -42,6 +43,7 @@ String processCommand(String command) {
     // CONNNECT
     case 'C':
       myStepper.enableOutputs();
+      isConnected = true;
       return "OK";
     // DISCONNECT
     case 'D':
@@ -51,22 +53,26 @@ String processCommand(String command) {
         myStepper.move(0);
         myStepper.runToPosition();
       }
+      isConnected = false;
       myStepper.disableOutputs();
       return "OK";
     // FORWARD steps
     case 'F':
+      if(!isConnected) { return "NOK"; }
       isEnabled = true;
       myStepper.move(stepsNumber);
       myStepper.setSpeed(200);
       return "OK";
     // BACKWARD steps
     case 'B':
+      if(!isConnected) { return "NOK"; }
       isEnabled = true;
       myStepper.move(-stepsNumber);
       myStepper.setSpeed(-200);
       return "OK";
     // STOP
     case 'S':
+      if(!isConnected) { return "NOK"; }
       isEnabled = false;
       myStepper.stop();
       myStepper.move(0);
@@ -74,6 +80,7 @@ String processCommand(String command) {
       return "OK";
     // STATUS (aka WHAT)
     case 'W':
+      if(!isConnected) { return "NOK"; }
       return myStepper.isRunning() && isEnabled ? "MOVING" : "IDLE";
     default:
       return "UNKNOWN";
