@@ -24,12 +24,13 @@ namespace ASCOM.SHSimpleFocuser
         {
             traceLogger.LogMessage("Connected Set", "Connecting to port " + comPort);
             serialConnection.PortName = comPort;
-            serialConnection.Speed = SerialSpeed.ps9600;
+            serialConnection.Speed = SerialSpeed.ps57600;
             serialConnection.Parity = SerialParity.None;
             serialConnection.StopBits = SerialStopBits.One;
             serialConnection.DataBits = 8;
-            serialConnection.ReceiveTimeout = 5;
+            serialConnection.ReceiveTimeout = 10;
             serialConnection.Connected = true;
+            _ = ReadResponse();
             connected = CommandBool(Commands.Connect);
             if(!connected)
             {
@@ -68,7 +69,7 @@ namespace ASCOM.SHSimpleFocuser
                 CommandString(Commands.Forward(position));
             } else
             {
-                CommandString(Commands.Backward(position));
+                CommandString(Commands.Backward(Math.Abs(position)));
             }
         }
 
@@ -135,19 +136,19 @@ namespace ASCOM.SHSimpleFocuser
 
     class Commands
     {
-        public static String Connect { get { return "C#"; } }
-        public static String Disconnect { get { return "D#"; } }
-        public static String Status { get { return "W#"; } }
-        public static String Stop { get { return "S#"; } }
+        public static String Connect { get { return "C"; } }
+        public static String Disconnect { get { return "D"; } }
+        public static String Status { get { return "W"; } }
+        public static String Stop { get { return "S"; } }
 
         public static String Forward(int position)
         {
-            return "F" + position.ToString() + "#";
+            return "F" + position.ToString();
         }
 
         public static String Backward(int position)
         {
-            return "B" + position.ToString() + "#";
+            return "B" + position.ToString();
         }
     }
 }

@@ -6,12 +6,14 @@
 // Pins entered in sequence IN1-IN3-IN2-IN4 for proper step sequence
 AccelStepper myStepper(MotorInterfaceType, 2, 4, 3, 5);
 
-bool isEnabled = false;
+bool isMoving = false;
 bool isConnected = false;
 
 void setup() {
-  Serial.begin(9600);
-  Serial.setTimeout(10);
+  Serial.begin(57600, SERIAL_8N1);
+  Serial.setTimeout(100);
+  while (!Serial);
+  Serial.println("INITIALIZED#");
 
   myStepper.setCurrentPosition(0);
 	myStepper.setMaxSpeed(200.0);
@@ -26,9 +28,11 @@ void loop() {
     Serial.println(response);
   }
 
-  if(isEnabled) {
+  if(isMoving) {
     if (myStepper.distanceToGo() != 0) {
       myStepper.runSpeed();
+    } else {
+      isMoving = false;
     }
   }
 }
@@ -44,45 +48,45 @@ String processCommand(String command) {
     case 'C':
       myStepper.enableOutputs();
       isConnected = true;
-      return "OK";
+      return "OK#";
     // DISCONNECT
     case 'D':
-      if(isEnabled) {
-        isEnabled = false;
+      if(isMoving) {
+        isMoving = false;
         myStepper.stop();
         myStepper.move(0);
         myStepper.runToPosition();
       }
       isConnected = false;
       myStepper.disableOutputs();
-      return "OK";
+      return "OK#";
     // FORWARD steps
     case 'F':
-      if(!isConnected) { return "NOK"; }
-      isEnabled = true;
+      if(!isConnected) { return "NOK#"; }
+      isMoving = true;
       myStepper.move(stepsNumber);
       myStepper.setSpeed(200);
-      return "OK";
+      return "OK#";
     // BACKWARD steps
     case 'B':
-      if(!isConnected) { return "NOK"; }
-      isEnabled = true;
+      if(!isConnected) { return "NOK#"; }
+      isMoving = true;
       myStepper.move(-stepsNumber);
       myStepper.setSpeed(-200);
-      return "OK";
+      return "OK#";
     // STOP
     case 'S':
-      if(!isConnected) { return "NOK"; }
-      isEnabled = false;
+      if(!isConnected) { return "NOK#"; }
+      isMoving = false;
       myStepper.stop();
       myStepper.move(0);
       myStepper.runToPosition();
-      return "OK";
+      return "OK#";
     // STATUS (aka WHAT)
     case 'W':
-      if(!isConnected) { return "NOK"; }
-      return myStepper.isRunning() && isEnabled ? "MOVING" : "IDLE";
+      if(!isConnected) { return "NOK#"; }
+      return myStepper.isRunning() && isMoving ? "MOVING#" : "IDLE#";
     default:
-      return "UNKNOWN";
+      return "UNKNOWN#";
   }
 }
