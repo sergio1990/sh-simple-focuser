@@ -15,6 +15,7 @@ void setup() {
   myStepper.setCurrentPosition(0);
 	myStepper.setMaxSpeed(200.0);
 	myStepper.setSpeed(200);
+  myStepper.disableOutputs();
 }
 
 void loop() {
@@ -38,22 +39,40 @@ String processCommand(String command) {
   int stepsNumber = stepsString.toInt();
 
   switch(commandCode) {
+    // CONNNECT
+    case 'C':
+      myStepper.enableOutputs();
+      return "OK";
+    // DISCONNECT
+    case 'D':
+      if(isEnabled) {
+        isEnabled = false;
+        myStepper.stop();
+        myStepper.move(0);
+        myStepper.runToPosition();
+      }
+      myStepper.disableOutputs();
+      return "OK";
+    // FORWARD steps
     case 'F':
       isEnabled = true;
       myStepper.move(stepsNumber);
       myStepper.setSpeed(200);
       return "OK";
+    // BACKWARD steps
     case 'B':
       isEnabled = true;
       myStepper.move(-stepsNumber);
       myStepper.setSpeed(-200);
       return "OK";
+    // STOP
     case 'S':
       isEnabled = false;
       myStepper.stop();
       myStepper.move(0);
       myStepper.runToPosition();
       return "OK";
+    // STATUS (aka WHAT)
     case 'W':
       return myStepper.isRunning() && isEnabled ? "MOVING" : "IDLE";
     default:
