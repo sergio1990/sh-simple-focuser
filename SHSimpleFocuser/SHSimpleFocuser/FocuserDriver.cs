@@ -79,11 +79,6 @@ namespace ASCOM.SHSimpleFocuser
         internal static string comPort; // Variables to hold the current device configuration
 
         /// <summary>
-        /// Private variable to hold the connected state
-        /// </summary>
-        private bool connectedState;
-
-        /// <summary>
         /// Private variable to hold an ASCOM Utilities object
         /// </summary>
         private Util utilities;
@@ -98,6 +93,8 @@ namespace ASCOM.SHSimpleFocuser
         /// </summary>
         internal TraceLogger tl;
 
+        private DeviceController deviceController;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SHSimpleFocuser"/> class.
         /// Must be public for COM registration.
@@ -109,7 +106,8 @@ namespace ASCOM.SHSimpleFocuser
 
             tl.LogMessage("Focuser", "Starting initialisation");
 
-            connectedState = false; // Initialise connected to false
+            deviceController = new DeviceController();
+
             utilities = new Util(); //Initialise util object
             astroUtilities = new AstroUtils(); // Initialise astro-utilities object
             //TODO: Implement your additional construction here
@@ -250,6 +248,7 @@ namespace ASCOM.SHSimpleFocuser
             utilities = null;
             astroUtilities.Dispose();
             astroUtilities = null;
+            deviceController.Dispose();
         }
 
         /// <summary>
@@ -272,15 +271,13 @@ namespace ASCOM.SHSimpleFocuser
 
                 if (value)
                 {
-                    connectedState = true;
                     LogMessage("Connected Set", "Connecting to port {0}", comPort);
-                    // TODO connect to the device
+                    deviceController.Connect(comPort);
                 }
                 else
                 {
-                    connectedState = false;
                     LogMessage("Connected Set", "Disconnecting from port {0}", comPort);
-                    // TODO disconnect from the device
+                    deviceController.Disconnect();
                 }
             }
         }
@@ -348,7 +345,7 @@ namespace ASCOM.SHSimpleFocuser
         {
             get
             {
-                string name = "Short driver name - please customise";
+                string name = "SHSimpleFocuser";
                 tl.LogMessage("Name Get", name);
                 return name;
             }
@@ -368,8 +365,8 @@ namespace ASCOM.SHSimpleFocuser
         {
             get
             {
-                tl.LogMessage("Absolute Get", true.ToString());
-                return true; // This is an absolute focuser
+                tl.LogMessage("Absolute Get", false.ToString());
+                return false;
             }
         }
 
@@ -378,8 +375,8 @@ namespace ASCOM.SHSimpleFocuser
         /// </summary>
         public void Halt()
         {
-            tl.LogMessage("Halt", "Not implemented");
-            throw new MethodNotImplementedException("Halt");
+            tl.LogMessage("Halt", "Done");
+            deviceController.Stop();
         }
 
         /// <summary>
@@ -389,8 +386,9 @@ namespace ASCOM.SHSimpleFocuser
         {
             get
             {
-                tl.LogMessage("IsMoving Get", false.ToString());
-                return false; // This focuser always moves instantaneously so no need for IsMoving ever to be True
+                bool value = deviceController.IsMoving;
+                tl.LogMessage("IsMoving Get", value.ToString());
+                return value;
             }
         }
 
@@ -443,7 +441,8 @@ namespace ASCOM.SHSimpleFocuser
         public void Move(int Position)
         {
             tl.LogMessage("Move", Position.ToString());
-            focuserPosition = Position; // Set the focuser position
+            focuserPosition = Position;
+            deviceController.Move(Position);
         }
 
         /// <summary>
@@ -598,8 +597,7 @@ namespace ASCOM.SHSimpleFocuser
         {
             get
             {
-                // TODO check that the driver hardware connection exists and is connected to the hardware
-                return connectedState;
+                return deviceController.Connected;
             }
         }
 
