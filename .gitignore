@@ -1,3 +1,4 @@
 /SHSimpleFocuser/SHSimpleFocuser/bin/**/*
 /SHSimpleFocuser/SHSimpleFocuser/obj/**/*
 /SHSimpleFocuser/.vs/**/*
+/DriverInstaller/*.exe

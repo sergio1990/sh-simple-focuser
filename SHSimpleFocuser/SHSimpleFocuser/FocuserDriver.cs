@@ -69,7 +69,7 @@ namespace ASCOM.SHSimpleFocuser
         /// <summary>
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
-        private static string driverDescription = "ASCOM Focuser Driver for SHSimpleFocuser.";
+        private static string driverDescription = "ASCOM Focuser Driver for SHSimpleFocuser";
 
         internal static string comPortProfileName = "COM Port"; // Constants used for Profile persistence
         internal static string comPortDefault = "COM1";
