@@ -34,7 +34,7 @@ Name: "{commoncf}\ASCOM\Uninstall\Focuser\SHSimpleFocuser"
 ; TODO: Add subfolders below {app} as needed (e.g. Name: "{app}\MyFolder")
 
 [Files]
-Source: "..\SHSimpleFocuser\SHSimpleFocuser\bin\x64\Release\ASCOM.SHSimpleFocuser.Focuser.dll"; DestDir: "{app}"
+Source: "..\SHSimpleFocuser\SHSimpleFocuser\bin\Release\ASCOM.SHSimpleFocuser.Focuser.dll"; DestDir: "{app}"
 ; Require a read-me HTML to appear after installation, maybe driver's Help doc
 ; Source: "F:\electronics\focuser\sh-simple-focuser\SHSimpleFocuser\SHSimpleFocuser\bin\x64\Release\ "; DestDir: "{app}"; Flags: isreadme
 ; TODO: Add other files needed by your driver here (add subfolders above)
