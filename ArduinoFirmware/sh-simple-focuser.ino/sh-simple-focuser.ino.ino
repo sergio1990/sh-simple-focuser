@@ -1,10 +1,10 @@
 #include <AccelStepper.h>
 
-#define MotorInterfaceType 4
+constexpr auto DEVICE_GUID = "906335CB-A62C-4134-B41E-7C2A4CF44D0C";
 
 // Creates an instance
 // Pins entered in sequence IN1-IN3-IN2-IN4 for proper step sequence
-AccelStepper myStepper(MotorInterfaceType, 2, 4, 3, 5);
+AccelStepper myStepper(AccelStepper::FULL4WIRE, 2, 4, 3, 5);
 
 bool isConnected = false;
 
@@ -71,6 +71,9 @@ String processCommand(String command) {
       myStepper.move(0);
       myStepper.runToPosition();
       return "OK#";
+    // PING
+    case 'P':
+      return "OK:" + String(DEVICE_GUID) + "#";
     // STATUS (aka WHAT)
     case 'W':
       if(!isConnected) { return "NOK#"; }
