@@ -1,12 +1,11 @@
 #include <AccelStepper.h>
 
-#define MotorInterfaceType 8
+#define MotorInterfaceType 4
 
 // Creates an instance
 // Pins entered in sequence IN1-IN3-IN2-IN4 for proper step sequence
 AccelStepper myStepper(MotorInterfaceType, 2, 4, 3, 5);
 
-bool isMoving = false;
 bool isConnected = false;
 
 void setup() {
@@ -17,7 +16,6 @@ void setup() {
 
   myStepper.setCurrentPosition(0);
 	myStepper.setMaxSpeed(200.0);
-	myStepper.setSpeed(200);
   myStepper.disableOutputs();
 }
 
@@ -28,13 +26,7 @@ void loop() {
     Serial.println(response);
   }
 
-  if(isMoving) {
-    if (myStepper.distanceToGo() != 0) {
-      myStepper.runSpeed();
-    } else {
-      isMoving = false;
-    }
-  }
+  myStepper.runSpeedToPosition();
 }
 
 String processCommand(String command) {
@@ -42,6 +34,7 @@ String processCommand(String command) {
 
   String stepsString = command.substring(1);
   int stepsNumber = stepsString.toInt();
+  bool isRunning = myStepper.isRunning() && myStepper.distanceToGo() > 0;
 
   switch(commandCode) {
     // CONNNECT
@@ -51,9 +44,8 @@ String processCommand(String command) {
       return "OK#";
     // DISCONNECT
     case 'D':
-      if(isMoving) {
-        isMoving = false;
-        myStepper.stop();
+      if(isRunning) {
+        myStepper.setSpeed(0);
         myStepper.move(0);
         myStepper.runToPosition();
       }
@@ -63,29 +55,26 @@ String processCommand(String command) {
     // FORWARD steps
     case 'F':
       if(!isConnected) { return "NOK#"; }
-      isMoving = true;
       myStepper.move(stepsNumber);
       myStepper.setSpeed(200);
       return "OK#";
     // BACKWARD steps
     case 'B':
       if(!isConnected) { return "NOK#"; }
-      isMoving = true;
       myStepper.move(-stepsNumber);
-      myStepper.setSpeed(-200);
+      myStepper.setSpeed(200);
       return "OK#";
     // STOP
     case 'S':
       if(!isConnected) { return "NOK#"; }
-      isMoving = false;
-      myStepper.stop();
+      myStepper.setSpeed(0);
       myStepper.move(0);
       myStepper.runToPosition();
       return "OK#";
     // STATUS (aka WHAT)
     case 'W':
       if(!isConnected) { return "NOK#"; }
-      return myStepper.isRunning() && isMoving ? "MOVING#" : "IDLE#";
+      return isRunning ? "MOVING#" : "IDLE#";
     default:
       return "UNKNOWN#";
   }
