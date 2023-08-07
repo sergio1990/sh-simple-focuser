@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("ASCOM.SHSimpleFocuser.Focuser")]
 [assembly: AssemblyDescription("ASCOM Focuser driver for SHSimpleFocuser")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Serhii Herniak")]
+[assembly: AssemblyCompany("SH Astro")]
 [assembly: AssemblyProduct("ASCOM Focuser driver for SHSimpleFocuser")]
 [assembly: AssemblyCopyright("Copyright © 2023 Serhii Herniak")]
 [assembly: AssemblyTrademark("")]
@@ -36,6 +36,6 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 //
 // TODO - Set your driver's version here
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]
 [assembly: NeutralResourcesLanguage("en-001")]

@@ -32,7 +32,8 @@ namespace ASCOM.SHSimpleFocuser
             // Update the state variables with results from the dialogue
             try
             {
-                Focuser.comPort = (string)comboBoxComPort.SelectedItem;
+                Focuser.autoDetectComPort = chkAutoDetectComPort.Checked;
+                Focuser.comPortOverride = (string)comboBoxComPort.SelectedItem;
             }
             catch
             {
@@ -65,14 +66,15 @@ namespace ASCOM.SHSimpleFocuser
 
         private void InitUI()
         {
+            chkAutoDetectComPort.Checked = Focuser.autoDetectComPort;
             chkTrace.Checked = tl.Enabled;
             // set the list of com ports to those that are currently available
             comboBoxComPort.Items.Clear();
             comboBoxComPort.Items.AddRange(System.IO.Ports.SerialPort.GetPortNames());      // use System.IO because it's static
             // select the current port if possible
-            if (comboBoxComPort.Items.Contains(Focuser.comPort))
+            if (comboBoxComPort.Items.Contains(Focuser.comPortOverride))
             {
-                comboBoxComPort.SelectedItem = Focuser.comPort;
+                comboBoxComPort.SelectedItem = Focuser.comPortOverride;
             }
         }
     }

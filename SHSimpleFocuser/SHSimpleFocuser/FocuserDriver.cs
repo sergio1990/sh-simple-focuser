@@ -37,6 +37,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -71,12 +72,23 @@ namespace ASCOM.SHSimpleFocuser
         /// </summary>
         private static string driverDescription = "ASCOM Focuser Driver for SHSimpleFocuser";
 
+        internal static string autoDetectComPortProfileName = "Auto-Detect COM Port";
+        internal static string autoDetectComPortDefault = "true";
         internal static string comPortProfileName = "COM Port"; // Constants used for Profile persistence
         internal static string comPortDefault = "COM1";
         internal static string traceStateProfileName = "Trace Level";
         internal static string traceStateDefault = "false";
 
-        internal static string comPort; // Variables to hold the current device configuration
+        internal static bool autoDetectComPort = Convert.ToBoolean(autoDetectComPortDefault);
+        internal static string comPortOverride; // Variables to hold the current device configuration
+
+        private const string SEPARATOR = "#";
+        private const string DEVICE_GUID = "906335CB-A62C-4134-B41E-7C2A4CF44D0C";
+
+        /// <summary>
+        /// Private variable to hold the COM port we are actually connected to
+        /// </summary>
+        private string comPort;
 
         /// <summary>
         /// Private variable to hold an ASCOM Utilities object
@@ -271,6 +283,22 @@ namespace ASCOM.SHSimpleFocuser
 
                 if (value)
                 {
+                    if (autoDetectComPort)
+                    {
+                        comPort = DetectCOMPort();
+                    }
+
+                    // Fallback, in case of detection error...
+                    if (comPort == null)
+                    {
+                        comPort = comPortOverride;
+                    }
+
+                    if (!System.IO.Ports.SerialPort.GetPortNames().Contains(comPort))
+                    {
+                        throw new InvalidValueException("Invalid COM port", comPort.ToString(), String.Join(", ", System.IO.Ports.SerialPort.GetPortNames()));
+                    }
+
                     LogMessage("Connected Set", "Connecting to port {0}", comPort);
                     deviceController.Connect(comPort);
                 }
@@ -622,7 +650,8 @@ namespace ASCOM.SHSimpleFocuser
             {
                 driverProfile.DeviceType = "Focuser";
                 tl.Enabled = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
-                comPort = driverProfile.GetValue(driverID, comPortProfileName, string.Empty, comPortDefault);
+                autoDetectComPort = Convert.ToBoolean(driverProfile.GetValue(driverID, autoDetectComPortProfileName, string.Empty, autoDetectComPortDefault));
+                comPortOverride = driverProfile.GetValue(driverID, comPortProfileName, string.Empty, comPortDefault);
             }
         }
 
@@ -635,7 +664,8 @@ namespace ASCOM.SHSimpleFocuser
             {
                 driverProfile.DeviceType = "Focuser";
                 driverProfile.WriteValue(driverID, traceStateProfileName, tl.Enabled.ToString());
-                if (!(comPort is null)) driverProfile.WriteValue(driverID, comPortProfileName, comPort.ToString());
+                driverProfile.WriteValue(driverID, autoDetectComPortProfileName, autoDetectComPort.ToString());
+                if (!(comPortOverride is null)) driverProfile.WriteValue(driverID, comPortProfileName, comPortOverride.ToString());
             }
         }
 
@@ -649,6 +679,79 @@ namespace ASCOM.SHSimpleFocuser
         {
             var msg = string.Format(message, args);
             tl.LogMessage(identifier, msg);
+        }
+
+        internal string DetectCOMPort()
+        {
+            foreach (string portName in System.IO.Ports.SerialPort.GetPortNames())
+            {
+                LogMessage("DetectCOMPort", "Trying port {0}...", portName);
+
+                Serial serial = null;
+
+                try
+                {
+                    serial = new Serial
+                    {
+                        Speed = SerialSpeed.ps57600,
+                        PortName = portName,
+                        Connected = true,
+                        ReceiveTimeout = 1,
+                        Parity = SerialParity.None,
+                        StopBits = SerialStopBits.One,
+                        DataBits = 8
+                };
+                }
+                catch (Exception)
+                {
+                    // If trying to connect to a port that is already in use, an exception will be thrown.
+                    continue;
+                }
+
+                // Wait a second for the serial connection to establish
+                System.Threading.Thread.Sleep(1000);
+
+                serial.ClearBuffers();
+
+                // Poll the device (with a short timeout value) until successful,
+                // or until we've reached the retry count limit of 3...
+                bool success = false;
+                for (int retries = 3; retries >= 0; retries--)
+                {
+                    string response = "";
+                    try
+                    {
+                        // Try to handle the INITIALIZED# message
+                        _ = serial.ReceiveTerminated(SEPARATOR);
+                        serial.Transmit("P" + SEPARATOR);
+                        response = serial.ReceiveTerminated(SEPARATOR).Trim().Replace("#", "").Replace("\r", "").Replace("\n", "");
+                    }
+                    catch (Exception)
+                    {
+                        LogMessage("DetectCOMPort", "Port {0} in use or the timeout happend!", portName);
+                        // PortInUse or Timeout exceptions may happen here!
+                        // We ignore them.
+                    }
+                    LogMessage("DetectCOMPort", "Response from {0} is {1}", portName, response);
+                    if (response == "OK:" + DEVICE_GUID)
+                    {
+                        success = true;
+                        break;
+                    }
+                }
+
+                serial.Connected = false;
+                serial.Dispose();
+
+                if (success)
+                {
+                    LogMessage("DetectCOMPort", "Successfully detected the COM port: {0}", portName);
+                    return portName;
+                }
+            }
+
+            LogMessage("DetectCOMPort", "Failed detecting the COM port!");
+            return null;
         }
         #endregion
     }

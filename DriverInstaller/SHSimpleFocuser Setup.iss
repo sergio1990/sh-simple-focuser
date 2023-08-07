@@ -5,13 +5,13 @@
 [Setup]
 AppID={{2714df88-2377-4628-99c9-e67f9fbf9e1b}
 AppName=ASCOM SHSimpleFocuser Focuser Driver
-AppVerName=ASCOM SHSimpleFocuser Focuser Driver 1.0.0
-AppVersion=1.0.0
+AppVerName=ASCOM SHSimpleFocuser Focuser Driver 1.1.0
+AppVersion=1.1.0
 AppPublisher=Serhii Herniak <sergeg1990@gmail.com>
 AppPublisherURL=mailto:sergeg1990@gmail.com
 AppSupportURL=https://ascomtalk.groups.io/g/Help
 AppUpdatesURL=https://ascom-standards.org/
-VersionInfoVersion=1.0.0
+VersionInfoVersion=1.1.0
 MinVersion=6.1.7601
 DefaultDirName="{commoncf}\ASCOM\Focuser"
 DisableDirPage=yes
