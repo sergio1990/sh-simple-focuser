@@ -4,7 +4,7 @@ constexpr auto DEVICE_GUID = "906335CB-A62C-4134-B41E-7C2A4CF44D0C";
 
 // Creates an instance
 // Pins entered in sequence IN1-IN3-IN2-IN4 for proper step sequence
-AccelStepper myStepper(AccelStepper::FULL4WIRE, 2, 4, 3, 5);
+AccelStepper myStepper(AccelStepper::HALF4WIRE, 2, 4, 3, 5);
 
 bool isConnected = false;
 
@@ -34,7 +34,7 @@ String processCommand(String command) {
 
   String stepsString = command.substring(1);
   int stepsNumber = stepsString.toInt();
-  bool isRunning = myStepper.isRunning() && myStepper.distanceToGo() > 0;
+  bool isRunning = myStepper.isRunning() && myStepper.distanceToGo() != 0;
 
   switch(commandCode) {
     // CONNNECT
