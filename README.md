@@ -48,3 +48,18 @@ phase the focuser looked like the following:
 <img src="./3DDesign/without_lid.png" width=500/>
 <br/>
 <img src="./3DDesign/moving_parts_section.png" width=500/>
+
+### N.I.N.A: Autofocus setup
+
+The N.I.N.A. astrophotography software provides the autofocusing feature and
+now having the automated focuser it makes sense to setup the autofocus. There
+is a great [video](https://www.youtube.com/watch?v=lHrfaR7A0L0) about how to
+setup auto-focus in N.I.N.A. quickly and correctly. I tried to follow mentioned
+steps and that's how the autofocus setup looks in my case:
+
+<img src="./Autofocus/settings.png" width=500/>
+
+Once applied all the settings the autofocus routine went correctly and the
+graph looks quite great:
+
+<img src="./Autofocus/routine.png" width=500/>
