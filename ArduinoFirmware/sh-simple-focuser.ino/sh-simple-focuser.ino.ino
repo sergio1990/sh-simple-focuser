@@ -12,7 +12,6 @@ void setup() {
   Serial.begin(57600, SERIAL_8N1);
   Serial.setTimeout(100);
   while (!Serial);
-  Serial.println("INITIALIZED#");
 
   myStepper.setCurrentPosition(0);
 	myStepper.setMaxSpeed(200.0);
@@ -24,6 +23,7 @@ void loop() {
     String command = Serial.readStringUntil('#');
     String response = processCommand(command);
     Serial.println(response);
+    Serial.flush();
   }
 
   myStepper.runSpeedToPosition();

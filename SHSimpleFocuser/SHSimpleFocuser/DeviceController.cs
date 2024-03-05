@@ -28,9 +28,8 @@ namespace ASCOM.SHSimpleFocuser
             serialConnection.Parity = SerialParity.None;
             serialConnection.StopBits = SerialStopBits.One;
             serialConnection.DataBits = 8;
-            serialConnection.ReceiveTimeout = 10;
+            serialConnection.ReceiveTimeout = 2;
             serialConnection.Connected = true;
-            _ = ReadResponse();
             connected = CommandBool(Commands.Connect);
             if(!connected)
             {
@@ -106,10 +105,24 @@ namespace ASCOM.SHSimpleFocuser
         /// <returns>Response returned by the device</returns>
         private string CommandString(string command)
         {
-            traceLogger.LogMessage("CommandString", "Sending command " + command);
-            //All commands from and to the arduino ends with #
-            serialConnection.Transmit(command + "#");
-            return ReadResponse();
+            for (int retries = 3; retries >= 0; retries--)
+            {
+                traceLogger.LogMessage("CommandString", "Sending command " + command);
+                //All commands from and to the arduino ends with #
+                serialConnection.Transmit(command + "#");
+                string response = ReadResponse();
+                if (response.Length > 0) {
+                    return response;
+                }
+                if (retries > 0)
+                {
+                    traceLogger.LogMessage("CommandString", "Empty response encountered. Retrying...");
+            
+                }
+            }
+
+            traceLogger.LogMessage("CommandString", "Retry limit has reached!");
+            return "";
         }
 
         /// <summary>
@@ -117,11 +130,19 @@ namespace ASCOM.SHSimpleFocuser
         /// </summary>
         private String ReadResponse()
         {
-            traceLogger.LogMessage("ReadResponse", "Reading response");
-            String response = serialConnection.ReceiveTerminated("#");
-            response = response.Replace("#", "").Replace("\r", "").Replace("\n", "");
-            traceLogger.LogMessage("ReadResponse", "Received response " + response);
-            return response;
+            try
+            {
+                traceLogger.LogMessage("ReadResponse", "Reading response");
+                String response = serialConnection.ReceiveTerminated("#");
+                response = response.Replace("#", "").Replace("\r", "").Replace("\n", "");
+                traceLogger.LogMessage("ReadResponse", "Received response " + response);
+                return response;
+            }
+            catch (Exception)
+            {
+                traceLogger.LogMessage("ReadResponse", "Port in use or timeout!");
+                return "";
+            }
         }
 
 

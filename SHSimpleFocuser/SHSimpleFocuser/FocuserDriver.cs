@@ -696,7 +696,7 @@ namespace ASCOM.SHSimpleFocuser
                         Speed = SerialSpeed.ps57600,
                         PortName = portName,
                         Connected = true,
-                        ReceiveTimeout = 1,
+                        ReceiveTimeout = 2,
                         Parity = SerialParity.None,
                         StopBits = SerialStopBits.One,
                         DataBits = 8
@@ -721,8 +721,6 @@ namespace ASCOM.SHSimpleFocuser
                     string response = "";
                     try
                     {
-                        // Try to handle the INITIALIZED# message
-                        _ = serial.ReceiveTerminated(SEPARATOR);
                         serial.Transmit("P" + SEPARATOR);
                         response = serial.ReceiveTerminated(SEPARATOR).Trim().Replace("#", "").Replace("\r", "").Replace("\n", "");
                     }
