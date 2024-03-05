@@ -23,6 +23,7 @@ void loop() {
     String command = Serial.readStringUntil('#');
     String response = processCommand(command);
     Serial.println(response);
+    Serial.flush();
   }
 
   myStepper.runSpeedToPosition();

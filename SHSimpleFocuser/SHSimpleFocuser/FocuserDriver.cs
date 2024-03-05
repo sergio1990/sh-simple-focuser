@@ -696,7 +696,7 @@ namespace ASCOM.SHSimpleFocuser
                         Speed = SerialSpeed.ps57600,
                         PortName = portName,
                         Connected = true,
-                        ReceiveTimeout = 1,
+                        ReceiveTimeout = 2,
                         Parity = SerialParity.None,
                         StopBits = SerialStopBits.One,
                         DataBits = 8
