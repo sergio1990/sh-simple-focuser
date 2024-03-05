@@ -30,7 +30,6 @@ namespace ASCOM.SHSimpleFocuser
             serialConnection.DataBits = 8;
             serialConnection.ReceiveTimeout = 10;
             serialConnection.Connected = true;
-            _ = ReadResponse();
             connected = CommandBool(Commands.Connect);
             if(!connected)
             {

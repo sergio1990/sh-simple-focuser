@@ -721,8 +721,6 @@ namespace ASCOM.SHSimpleFocuser
                     string response = "";
                     try
                     {
-                        // Try to handle the INITIALIZED# message
-                        _ = serial.ReceiveTerminated(SEPARATOR);
                         serial.Transmit("P" + SEPARATOR);
                         response = serial.ReceiveTerminated(SEPARATOR).Trim().Replace("#", "").Replace("\r", "").Replace("\n", "");
                     }
